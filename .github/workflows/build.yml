@@ -167,9 +167,7 @@ jobs:
         if [[ ${{matrix.target}} == *Unified* ]] ; then
           OUTFILE_RELEASE=~/release/`echo ${{ matrix.target }} | sed s/_via.*//`.bin
           cp $OUTDIR/firmware.bin $OUTFILE_RELEASE >& /dev/null || :
-          echo 'outfile=${OUTFILE_RELEASE}' >> $GITHUB_OUTPUT
-        else
-          echo 'outfile=empty' >> $GITHUB_OUTPUT
+          echo "outfile=${OUTFILE_RELEASE}" >> $GITHUB_OUTPUT
         fi
 
     - name: Store Artifacts
@@ -179,8 +177,11 @@ jobs:
         path: ~/artifacts/**/*
       continue-on-error: true
 
+    - name: Debug Output
+      run: echo ${{ steps.pio-run.outputs.outfile }}
+
     - name: Upload firmware to release
-      if: ${{ startsWith(github.event.ref, 'refs/tags/') && steps.pio-run.outputs.outfile != 'empty' }}
+      if: ${{ startsWith(github.event.ref, 'refs/tags/') && steps.pio-run.outputs.outfile != '' }}
       uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
